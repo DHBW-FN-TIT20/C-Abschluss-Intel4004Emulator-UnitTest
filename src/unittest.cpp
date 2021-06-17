@@ -285,10 +285,10 @@ TEST_CASE("UnitTest_Intel4004") {
     }
     SECTION("JCN") {
         /**
-         * JCN_0 0x03   1   JUMP to 0x03 because carry=0
+         * JCN_10 0x03  1   JUMP to 0x03 because carry=0
          * NOP          0
          * CMC          1   set carry=1
-         * JCN_0 0x07   1   no JUMP because no condition is true
+         * JCN_10 0x07  1   no JUMP because no condition is true
          * NOP          1
          * JCN_1 0x0A   1   JUMP to 0x0A because testPin=0
          * NOP          0
@@ -302,12 +302,12 @@ TEST_CASE("UnitTest_Intel4004") {
          * NOP          1   
          * JCN_12 0x19  1   no JUMP because accumulator=0
          * NOP          1
-         * JCN_15 0x1C  1   JUMP to 0x1C because every condition is true
+         * JCN_7 0x1C   1   JUMP to 0x1C because every condition is true
          * NOP          0
          * NOP          1
          */
 
-        uint8_t source[] = { JCN_0, 0x03, NOP, CMC, JCN_0, 0x07, NOP, JCN_1, 0x0A, NOP, JCN_2, 0x0D, NOP, JCN_4, 0x10, NOP, JCN_9, 0x13, NOP, JCN_10, 0x16, NOP, JCN_12, 0x19, NOP, JCN_15, 0x1C, NOP, NOP };
+        uint8_t source[] = { JCN_10, 0x03, NOP, CMC, JCN_10, 0x07, NOP, JCN_1, 0x0A, NOP, JCN_2, 0x0D, NOP, JCN_4, 0x10, NOP, JCN_9, 0x13, NOP, JCN_10, 0x16, NOP, JCN_12, 0x19, NOP, JCN_7, 0x1C, NOP, NOP };
 
         Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
@@ -317,14 +317,14 @@ TEST_CASE("UnitTest_Intel4004") {
         CHECK_FALSE(processor->getCarry());
         CHECK_FALSE(processor->getAccumulator());
         CHECK_FALSE(processor->getTestPin());
-        // JCN_0 0x03
+        // JCN_10 0x03
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x03);
         // CMC
         processor->nextCommand();
         CHECK(processor->getCarry());
         CHECK(processor->getPC().banked.address == 0x04);
-        // JCN_0 0c07
+        // JCN_10 0x07
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x06);
         CHECK(processor->getCarry());
@@ -358,7 +358,7 @@ TEST_CASE("UnitTest_Intel4004") {
         // NOP
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x19);
-        // JCN_15 0x1C
+        // JCN_7 0x1C
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1C);
 
@@ -447,7 +447,7 @@ TEST_CASE("UnitTest_Intel4004") {
         // FIM_0 0x11
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R1_R0) == 0x11);
-        CHECK(processor->getPC().banked.address == 0x02);
+        CHECK(processor->getPC().banked.address == 0x03);
         CHECK(processor->getCarry());
         // FIM_2 0x02
         processor->nextCommand();
@@ -536,10 +536,10 @@ TEST_CASE("UnitTest_Intel4004") {
         // FIN_14
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R15_R14) == 0x02);
-        CHECK_FALSE(processor->getCarry());
+        CHECK(processor->getCarry());
         CHECK_FALSE(processor->getAccumulator());
 
-        CHECK(processor->getTicks() == 11);
+        CHECK(processor->getTicks() == 19);
 
         // RESET Processor to test jump at ROM-END
         processor->reset();
@@ -586,7 +586,7 @@ TEST_CASE("UnitTest_Intel4004") {
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R3_R2) == 0x3A);
 
-        CHECK(processor->getTicks() == 5);
+        CHECK(processor->getTicks() == 6);
     }
     SECTION("JIN") {
         /**
@@ -709,7 +709,7 @@ TEST_CASE("UnitTest_Intel4004") {
         }
 
         sourceTwo[0] = FIM_0;
-        sourceTwo[1] = 0x03;
+        sourceTwo[1] = 0x02;
         sourceTwo[2] = JCN_4;
         sourceTwo[3] = 0xFF;
         sourceTwo[0xFF] = JIN_0;
@@ -757,11 +757,15 @@ TEST_CASE("UnitTest_Intel4004") {
          * JUN_13 0x11  1   JUMP to 0xD11
          * JUN_14 0x87  1   JUMP to 0xE87
          * JUN_15 0x12  1   JUMP to 0xF12
-         * JUN_0 0x02   1   JUMP to 0x002
+         * JUN_0 0x03   1   JUMP to 0x003
          * NOP          1
          */
 
         uint8_t source[0x1000];
+
+        for (int i = 0; i < 0x1000; i++) {
+            source[i] = 0x00;
+        }
 
         source[0x000] = CMC;
         source[0x001] = JUN_1;
@@ -795,8 +799,8 @@ TEST_CASE("UnitTest_Intel4004") {
         source[0xE87] = JUN_15;
         source[0xE88] = 0x12;
         source[0xF12] = JUN_0;
-        source[0xF13] = 0x02;
-        source[0x002] = NOP;
+        source[0xF13] = 0x03;
+        source[0x003] = NOP;
 
         Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
@@ -870,10 +874,10 @@ TEST_CASE("UnitTest_Intel4004") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xF);
         CHECK(processor->getPC().banked.address == 0x12);
-        // JUN_0 0x02
+        // JUN_0 0x03
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x0);
-        CHECK(processor->getPC().banked.address == 0x02);
+        CHECK(processor->getPC().banked.address == 0x03);
 
         CHECK(processor->getTicks() == 33);
     }
