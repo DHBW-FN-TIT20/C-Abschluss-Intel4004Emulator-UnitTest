@@ -1,6 +1,3 @@
-// Replace Intel4004 with your Intel4004 class name
-#define INTEL_MCS4_CLASS Intel4004
-
 #define _UNITTEST_
 #ifdef _UNITTEST_
 #define CATCH_CONFIG_FAST_COMPILE
@@ -272,8 +269,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { NOP, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
 
@@ -313,8 +309,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { JCN_0, 0x03, NOP, CMC, JCN_0, 0x07, NOP, JCN_1, 0x0A, NOP, JCN_2, 0x0D, NOP, JCN_4, 0x10, NOP, JCN_9, 0x13, NOP, JCN_10, 0x16, NOP, JCN_12, 0x19, NOP, JCN_15, 0x1C, NOP, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 29);
 
@@ -430,8 +425,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { CMC, FIM_0, 0x11, FIM_2, 0x02, FIM_4, 0x04, FIM_6, 0x06, FIM_8, 0x08, FIM_10, 0x0A, FIM_12, 0x0C, FIM_14, 0x0E, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 18);
 
@@ -496,8 +490,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { FIN_0, FIM_0, 0x02, CMC, FIN_2, FIN_4, FIN_6, FIN_8, FIN_10, FIN_12, FIN_14, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 12);
 
@@ -627,8 +620,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { FIM_0, 0x13, FIM_2, 0x15, FIM_4, 0x17, FIM_6, 0x19, FIM_8, 0x1B, FIM_10, 0x1D, FIM_12, 0x1F, FIM_14, 0x21, CMC, JIN_0, NOP, JIN_2, NOP, JIN_4, NOP, JIN_6, NOP, JIN_8, NOP, JIN_10, NOP, JIN_12, NOP, JIN_14, NOP, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 34);
 
@@ -806,8 +798,7 @@ TEST_CASE("UnitTest_Intel4004") {
         source[0xF13] = 0x02;
         source[0x002] = NOP;
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4096);
 
@@ -897,8 +888,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { CMC, JMS_0, 0x04, NOP, JMS_1, 0x21, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 7);
 
@@ -959,8 +949,7 @@ TEST_CASE("UnitTest_Intel4004") {
 
         uint8_t source[] = { CMC, FIM_0, 0x01, FIM_2, 0x23, FIM_4, 0x45, FIM_6, 0x67, FIM_8, 0x89, FIM_10, 0xAB, FIM_12, 0xCD, FIM_14, 0xEF, INC_0, INC_1, INC_2, INC_3, INC_4, INC_5, INC_6, INC_7, INC_8, INC_9, INC_10, INC_11, INC_12, INC_13, INC_14, INC_15, NOP };
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 34);
 
@@ -1072,8 +1061,7 @@ TEST_CASE("UnitTest_Intel4004") {
         source[0x0FF] = 0x14;
         source[0x114] = NOP;
 
-        INTEL_MCS4_CLASS instance;
-        Intel4004Base *processor = { &instance };
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
         CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 512);
 
