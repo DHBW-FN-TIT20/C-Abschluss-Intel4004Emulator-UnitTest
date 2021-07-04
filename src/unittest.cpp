@@ -1342,20 +1342,473 @@ TEST_CASE("UnitTest_Intel4004") {
         CHECK(processor->getTicks() == 8);
     }
     SECTION("BBL") {
+        /**
+         * JMS_1 0x12   1
+         * BBL_5        1
+         * JMS_1 0x24   1
+         * CMC          1
+         * BBL_0        1
+         * JMS_1 0x36   1
+         * JMS_2 0x00   1
+         * JMS_3 0x00   1
+         * JMS_4 0x00   1
+         * BBL_1        1
+         * BBL_2        1
+         * BBL_3        1
+         * BBL_4        1
+         */
+
+        uint8_t source[0x1000];
+
+        for (int i = 0; i < 0x1000; i++) {
+            source[i] = 0x00;
+        }
+
+        source[0x000] = JMS_1;
+        source[0x001] = 0x12;
+        source[0x112] = BBL_5;
+        source[0x002] = JMS_1;
+        source[0x003] = 0x24;
+        source[0x124] = CMC;
+        source[0x125] = BBL_0;
+        source[0x004] = JMS_1;
+        source[0x005] = 0x36;
+        source[0x136] = JMS_2;
+        source[0x137] = 0x00;
+        source[0x200] = JMS_3;
+        source[0x201] = 0x00;
+        source[0x300] = JMS_4;
+        source[0x301] = 0x00;
+        source[0x400] = BBL_1;
+        source[0x302] = BBL_2;
+        source[0x202] = BBL_3;
+        source[0x138] = BBL_4;
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4096);
+
+        UBankedAddress *stackCopy = new UBankedAddress[3];
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // JMS_1 0x12
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x1);
+        CHECK(processor->getPC().banked.address == 0x12);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x0);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x00);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x00);
+        // BBL_5
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x0);
+        CHECK(processor->getPC().banked.address == 0x02);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x0);
+        CHECK(stackCopy[0].banked.address == 0x00);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x00);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x02);
+        CHECK(processor->getAccumulator() == 0x5);
+        CHECK_FALSE(processor->getCarry());
+        //JMS_1 0x24
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x1);
+        CHECK(processor->getPC().banked.address == 0x24);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x0);
+        CHECK(stackCopy[0].banked.address == 0x04);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x00);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x00);
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // BBL_0
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x0);
+        CHECK(processor->getPC().banked.address == 0x04);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x0);
+        CHECK(stackCopy[0].banked.address == 0x00);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x00);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x04);
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK(processor->getCarry());
+        //JMS_1 0x36
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x1);
+        CHECK(processor->getPC().banked.address == 0x36);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x0);
+        CHECK(stackCopy[0].banked.address == 0x06);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x00);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x00);
+        //JMS_2 0x00
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x2);
+        CHECK(processor->getPC().banked.address == 0x00);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x1);
+        CHECK(stackCopy[0].banked.address == 0x38);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x06);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x00);
+        //JMS_3 0x00
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x3);
+        CHECK(processor->getPC().banked.address == 0x00);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x2);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x1);
+        CHECK(stackCopy[1].banked.address == 0x38);
+        CHECK(stackCopy[2].banked.bank == 0x0);
+        CHECK(stackCopy[2].banked.address == 0x06);
+        //JMS_4 0x00
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x4);
+        CHECK(processor->getPC().banked.address == 0x00);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x3);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x2);
+        CHECK(stackCopy[1].banked.address == 0x02);
+        CHECK(stackCopy[2].banked.bank == 0x1);
+        CHECK(stackCopy[2].banked.address == 0x38);
+        // BBL_1
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x3);
+        CHECK(processor->getPC().banked.address == 0x02);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x2);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x1);
+        CHECK(stackCopy[1].banked.address == 0x38);
+        CHECK(stackCopy[2].banked.bank == 0x3);
+        CHECK(stackCopy[2].banked.address == 0x02);
+        CHECK(processor->getAccumulator() == 0x1);
+        // BBL_2
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x2);
+        CHECK(processor->getPC().banked.address == 0x02);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x1);
+        CHECK(stackCopy[0].banked.address == 0x38);
+        CHECK(stackCopy[1].banked.bank == 0x3);
+        CHECK(stackCopy[1].banked.address == 0x02);
+        CHECK(stackCopy[2].banked.bank == 0x2);
+        CHECK(stackCopy[2].banked.address == 0x02);
+        CHECK(processor->getAccumulator() == 0x2);
+        // BBL_3
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x1);
+        CHECK(processor->getPC().banked.address == 0x38);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x3);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x2);
+        CHECK(stackCopy[1].banked.address == 0x02);
+        CHECK(stackCopy[2].banked.bank == 0x1);
+        CHECK(stackCopy[2].banked.address == 0x38);
+        CHECK(processor->getAccumulator() == 0x3);
+        // BBL_4
+        processor->nextCommand();
+        CHECK(processor->getPC().banked.bank == 0x3);
+        CHECK(processor->getPC().banked.address == 0x02);
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+        CHECK(stackCopy[0].banked.bank == 0x2);
+        CHECK(stackCopy[0].banked.address == 0x02);
+        CHECK(stackCopy[1].banked.bank == 0x1);
+        CHECK(stackCopy[1].banked.address == 0x38);
+        CHECK(stackCopy[2].banked.bank == 0x3);
+        CHECK(stackCopy[2].banked.address == 0x02);
+        CHECK(processor->getAccumulator() == 0x4);
+
+        delete[] stackCopy;
+
+        CHECK(processor->getTicks() == 19);
     }
     SECTION("LDM") {
+        /**
+         * LDM_2        1
+         * CMC          1
+         * LDM_15       1
+         * LDM_0        1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_2, CMC, LDM_15, LDM_0, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 5);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_2
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x2);
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // LDM_15
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xF);
+        CHECK(processor->getCarry());
+        //LDM_0
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK(processor->getCarry());
+
+        CHECK(processor->getTicks() == 4);
     }
     SECTION("CLB") {
+        /**
+         * LDM_2        1
+         * CLB          1
+         * CMC          1
+         * LDM_15       1
+         * CLB          1
+         * CMC          1
+         * CLB          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_2, CLB, CMC, LDM_15, CLB, CMC, CLB, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 8);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_2
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x2);
+        CHECK_FALSE(processor->getCarry());
+        // CLB
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // LDM_15
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xF);
+        CHECK(processor->getCarry());
+        // CLB
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // CLB
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK_FALSE(processor->getCarry());
+
+        CHECK(processor->getTicks() == 7);
     }
     SECTION("CLC") {
+        /**
+         * LDM_2        1
+         * CLC          1
+         * CMC          1
+         * CLC          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_2, CLC, CMC, CLC, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 5);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_2
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x2);
+        CHECK_FALSE(processor->getCarry());
+        // CLC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x2);
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // CLC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x2);
+        CHECK_FALSE(processor->getCarry());
+
+        CHECK(processor->getTicks() == 4);
     }
     SECTION("IAC") {
+        /**
+         * LDM_13       1
+         * CMC          1
+         * IAC          1
+         * IAC          1
+         * IAC          1
+         * IAC          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_13, CMC, IAC, IAC, IAC, IAC, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 7);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_13
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xD);
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // IAC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xE);
+        CHECK_FALSE(processor->getCarry());
+        // IAC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xF);
+        CHECK_FALSE(processor->getCarry());
+        // IAC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x0);
+        CHECK(processor->getCarry());
+        // IAC
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x1);
+        CHECK_FALSE(processor->getCarry());
+
+        CHECK(processor->getTicks() == 6);
     }
     SECTION("CMC") {
+        /**
+         * CMC          1
+         * CMC          1
+         * CMC          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { CMC, CMC, CMC, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK_FALSE(processor->getCarry());
+        // CMC
+        processor->nextCommand();
+        CHECK(processor->getCarry());
+
+        CHECK(processor->getTicks() == 3);
     }
     SECTION("RAL") {
+        /**
+         * LDM_11       1
+         * RAL          1
+         * RAL          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_11, RAL, RAL, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_11
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xB);
+        CHECK_FALSE(processor->getCarry());
+        // RAL
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x6);
+        CHECK(processor->getCarry());
+        // RAL
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xD);
+        CHECK_FALSE(processor->getCarry());
+
+        CHECK(processor->getTicks() == 3);
     }
     SECTION("RAR") {
+        /**
+         * LDM_11       1
+         * RAR          1
+         * RAR          1
+         * NOP          1
+         */
+
+        uint8_t source[] = { LDM_11, RAR, RAR, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4);
+
+        REQUIRE(processor->getPC().banked.bank == 0x0);
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        // LDM_11
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xB);
+        CHECK_FALSE(processor->getCarry());
+        // RAR
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0x5);
+        CHECK(processor->getCarry());
+        // RAR
+        processor->nextCommand();
+        CHECK(processor->getAccumulator() == 0xA);
+        CHECK(processor->getCarry());
+
+        CHECK(processor->getTicks() == 3);
     }
     SECTION("TCC") {
     }
