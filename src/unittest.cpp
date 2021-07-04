@@ -918,6 +918,8 @@ TEST_CASE("UnitTest_Intel4004") {
         stackCopy = processor->getPtrToStack()->getCopyOfStack(stackCopy);
         CHECK(stackCopy[0].banked.bank == 0x0);
         CHECK(stackCopy[0].banked.address == 0x06);
+        CHECK(stackCopy[1].banked.bank == 0x0);
+        CHECK(stackCopy[1].banked.address == 0x03);
 
         CHECK(processor->getTicks() == 5);
     }
@@ -1081,7 +1083,7 @@ TEST_CASE("UnitTest_Intel4004") {
         // FIM_0 0x00
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R1_R0) == 0x00);
-        for (int i = 0x01; i < 0xF; i++) {
+        for (int i = 0x01; i <= 0xF; i++) {
             // INC_1
             processor->nextCommand();
             CHECK(processor->getRegister(R1) == i);
@@ -1097,7 +1099,8 @@ TEST_CASE("UnitTest_Intel4004") {
         // ISZ_0 0x03
         processor->nextCommand();
         CHECK(processor->getRegister(R0) == 0x0);
-        CHECK(processor->getPC().banked.bank == 0x06);
+        CHECK(processor->getPC().banked.bank == 0x0);
+        CHECK(processor->getPC().banked.address == 0x06);
         CHECK(processor->getCarry());
         // JUN_0 0xFE
         processor->nextCommand();
