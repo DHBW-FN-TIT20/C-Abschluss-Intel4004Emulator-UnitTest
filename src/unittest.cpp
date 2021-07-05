@@ -3228,8 +3228,8 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         // RD1
         processor->nextCommand();
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 0) == 0x2);
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 0) == 0xF);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 1) == 0x2);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 1) == 0xF);
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
@@ -3309,8 +3309,8 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         // RD2
         processor->nextCommand();
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 0) == 0x2);
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 0) == 0xF);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 2) == 0x2);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 2) == 0xF);
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
@@ -3390,8 +3390,8 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         // RD3
         processor->nextCommand();
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 0) == 0x2);
-        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 0) == 0xF);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP3, REG3, 3) == 0x2);
+        CHECK(processor->getPtrToRAM()->readStatusNibble(BANK0, CHIP0, REG0, 3) == 0xF);
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
