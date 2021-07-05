@@ -17,15 +17,15 @@ Folder | Usage
 * Replace the following include paths with your corresponding paths *(Make sure to use \\ for windows and / for unix!)*
 ```C++
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	#include "..\inc\catch.hpp"
+    #include "..\inc\catch.hpp"
     #include "..\4004\4004.h"
 #elif __unix__
-	#include "../inc/catch.hpp"
+    #include "../inc/catch.hpp"
     #include "../4004/4004.h"
 #endif
 ```
-* Compile unittest.cpp according to the [Compile](##Compile) section
-* Run the compiled file, for help, take a look at the [How to run?](##How-to-run?) section
+* Compile unittest.cpp according to the [Compile](#Compile) section
+* Run the compiled file, for help, take a look at the [How to run?](#How-to-run?) section
 
 ## Compile
 ### Windows:
@@ -42,16 +42,16 @@ Folder | Usage
 
 ### Linux:
 * `./unittest.out <test name>`
-> Note: <test name> can be ignored for now because there is only one test case (UnitTest_Intel4004_Mnemonics)
+> Note: \<test name\> can be ignored for now because there is only one test case (UnitTest_Intel4004_Mnemonics)
 
 ### Commandline options:
 Option | Effect
 ------ | ------
 -h, -? | display usage information
 -s | include successful tests in output
--x <no. failures> | abort after x failures
--d <yes\|no> | show test durations
--c <section name> | specify section to run
+-x \<no. failures\> | abort after x failures
+-d \<yes\|no\> | show test durations
+-c \<section name\> | specify section to run
 
 > Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). Bsp: NOP, JCN, FIM, ...
 
