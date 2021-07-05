@@ -12,6 +12,11 @@
 
 #include <cstdint>
 
+#define INTEL_4001 Intel4001
+#define INTEL_4002 Intel4002
+#define INTEL_4004 Intel4004
+#define INTEL_4004_STACK Intel4004Stack
+
 typedef enum : uint8_t {
     NOP,
     JCN_0 = 0x10,
@@ -3396,6 +3401,13 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getCarry());
 
         CHECK(processor->getTicks() == 16);
+    }
+}
+
+TEST_CASE("UnitTest_4001") {
+    SECTION("reset") {
+        INTEL_4001 instance;
+        Intel4001Base *rom = { &instance };
     }
 }
 #endif
