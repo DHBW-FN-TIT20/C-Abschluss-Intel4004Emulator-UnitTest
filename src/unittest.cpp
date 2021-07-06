@@ -10,12 +10,15 @@
     #include "../4004/4004.h"
 #endif
 
-#include <cstdint>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    #define INTEL_HEX_FILE_PATH "..\\inc\\IntelHexFile.hex"
+    #define BINARY_FILE_PATH "..\\inc\\BinaryFile.bin"
+#elif __unix__
+    #define INTEL_HEX_FILE_PATH "../inc/IntelHexFile.hex"
+    #define BINARY_FILE_PATH "../inc/BinaryFile.bin"
+#endif
 
-#define INTEL_4001 Intel4001
-#define INTEL_4002 Intel4002
-#define INTEL_4004 Intel4004
-#define INTEL_4004_STACK Intel4004Stack
+#include <cstdint>
 
 typedef enum : uint8_t {
     NOP,
@@ -3405,9 +3408,261 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
 }
 
 TEST_CASE("UnitTest_4001") {
-    SECTION("reset") {
-        INTEL_4001 instance;
-        Intel4001Base *rom = { &instance };
+    SECTION("CONSTRUCTOR") {
+        Intel4004Base *processor = { get4004Instance(0xFFF0, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->getEnabledBank() == 0xFFF0);
+
+        for (int i = 0; i < 0x1000; i++) {
+            CHECK(processor->getPtrToROM()->read((UBankedAddress) i) == 0x0);
+        }
+        for (int i = 0; i < 16; i++) {
+            CHECK(processor->getPtrToROM()->readFromPort((EROMChip) i) == 0x0);
+        }
     }
+    SECTION("reset") {
+        Intel4004Base *processor = { get4004Instance(0xABCD, 0xFFFFFFFF) };
+
+        uint8_t source[] = { LDM_15, WR3, LDM_0, RD3, STC, FIM_0, 0xFF, SRC_0, LDM_2, WR3, LDM_0, RD3, FIM_0, 0x0F, SRC_0, RD3, NOP };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 17);
+        CHECK(processor->getPtrToROM()->getEnabledBank() == 0xABCD);
+
+        processor->getPtrToROM()->writeToPort(ROMCHIP0, 0xB);
+        processor->getPtrToROM()->writeToPort(ROMCHIP8, 0x4);
+
+        processor->getPtrToROM()->reset();
+
+        CHECK(processor->getPtrToROM()->getEnabledBank() == 0xABCD);
+        for (int i = 0; i < 0x1000; i++) {
+            CHECK(processor->getPtrToROM()->read((UBankedAddress) i) == 0x0);
+        }
+        for (int i = 0; i < 16; i++) {
+            CHECK(processor->getPtrToROM()->readFromPort((EROMChip) i) == 0x0);
+        }
+    }
+    SECTION("getEnabledBank") {
+        Intel4004Base *processor = { get4004Instance(0xABCD, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->getEnabledBank() == 0xABCD);
+
+        processor = { get4004Instance(0xBF34, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->getEnabledBank() == 0xBF34);
+    }
+    SECTION("writeFromBinaryFile") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        processor->getPtrToROM()->writeFromBinaryFile(BINARY_FILE_PATH);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0000) == 0x11);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0001) == 0x22);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0002) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0100) == 0x2F);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0101) == 0x00);
+
+        processor = { get4004Instance(0xFFFD, 0xFFFFFFFF) };
+
+        processor->getPtrToROM()->writeFromBinaryFile(BINARY_FILE_PATH);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0000) == 0x11);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0001) == 0x22);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0002) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0100) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0101) == 0x00);
+    }
+    SECTION("writeFromIntelHexFile") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        processor->getPtrToROM()->writeFromIntelHexFile(INTEL_HEX_FILE_PATH);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0000) == 0x31);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0001) == 0x32);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0100) == 0x61);
+
+        processor = { get4004Instance(0xFFFE, 0xFFFFFFFF) };
+
+        processor->getPtrToROM()->writeFromIntelHexFile(INTEL_HEX_FILE_PATH);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0000) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0001) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x0100) == 0x61);
+    }
+    SECTION("writeFrom") {
+        Intel4004Base *processor = { get4004Instance(0xFFFD, 0xFFFFFFFF) };
+
+        uint8_t source[0x1000];
+
+        for (int i = 0; i < 0x1000; i++) {
+            source[i] = 0x00;
+        }
+
+        source[0x000] = JMS_1;
+        source[0x001] = 0x12;
+        source[0x002] = JMS_1;
+        source[0x003] = 0x24;
+        source[0x004] = JMS_1;
+        source[0x005] = 0x36;
+        source[0x112] = BBL_5;
+        source[0x124] = CMC;
+        source[0x125] = BBL_0;
+        source[0x136] = JMS_2;
+        source[0x137] = 0x00;
+        source[0x138] = BBL_4;
+        source[0x200] = JMS_3;
+        source[0x201] = 0x00;
+        source[0x202] = BBL_3;
+        source[0x300] = JMS_4;
+        source[0x301] = 0x00;
+        source[0x302] = BBL_2;
+        source[0x400] = BBL_1;
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 0x1000);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x000) == JMS_1);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x001) == 0x12);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x002) == JMS_1);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x003) == 0x24);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x004) == JMS_1);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x005) == 0x36);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x112) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x124) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x125) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x136) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x137) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x138) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x200) == JMS_3);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x201) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x202) == BBL_3);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x300) == JMS_4);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x301) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x302) == BBL_2);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x400) == BBL_1);
+    }
+    SECTION("isLinAdrAccessable") {
+        Intel4004Base *processor = { get4004Instance(0xABCD, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0000));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0100));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0200));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0300));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0400));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0500));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0600));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0700));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0800));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0900));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0A00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0B00));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0C00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0D00));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0E00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0F00));
+
+        processor = { get4004Instance(0xBF34, 0xFFFFFFFF) };
+
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0000));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0100));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0200));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0300));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0400));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0500));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0600));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0700));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0800));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0900));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0A00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0B00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0C00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0D00));
+        CHECK_FALSE(processor->getPtrToROM()->isLinAdrAccessable(0x0E00));
+        CHECK(processor->getPtrToROM()->isLinAdrAccessable(0x0F00));
+    }
+    SECTION("read") {
+        Intel4004Base *processor = { get4004Instance(0xFFFE, 0xFFFFFFFF) };
+
+        uint8_t source[0x1000];
+
+        for (int i = 0; i < 0x1000; i++) {
+            source[i] = 0x00;
+        }
+
+        source[0x000] = 0x01;
+        source[0x101] = 0x02;
+        source[0x202] = 0x03;
+        source[0x303] = 0x04;
+        source[0x404] = 0x05;
+        source[0x505] = 0x06;
+        source[0x606] = 0x07;
+        source[0x707] = 0x08;
+        source[0x808] = 0x09;
+        source[0x909] = 0x0A;
+        source[0xA0A] = 0x0B;
+        source[0xB0B] = 0x0C;
+        source[0xC0C] = 0x0D;
+        source[0xD0D] = 0x0E;
+        source[0xE0E] = 0x0F;
+        source[0xF0F] = 0x10;
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 0x1000);
+
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x000) == 0x00);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x101) == 0x02);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x202) == 0x03);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x303) == 0x04);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x404) == 0x05);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x505) == 0x06);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x606) == 0x07);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x707) == 0x08);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x808) == 0x09);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0x909) == 0x0A);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xA0A) == 0x0B);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xB0B) == 0x0C);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xC0C) == 0x0D);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xD0D) == 0x0E);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xE0E) == 0x0F);
+        CHECK(processor->getPtrToROM()->read((UBankedAddress) 0xF0F) == 0x10);
+    }
+    SECTION("readFromPort/writeToPort") {
+        Intel4004Base *processor = { get4004Instance(0x0FFE, 0xFFFFFFFF) };
+        
+        CHECK_FALSE(processor->getPtrToROM()->writeToPort(ROMCHIP0, 0x1));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP1, 0x2));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP2, 0x3));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP3, 0x4));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP4, 0x5));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP5, 0x6));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP6, 0x7));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP7, 0x8));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP8, 0x9));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP9, 0xA));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP10, 0xB));
+        CHECK(processor->getPtrToROM()->writeToPort(ROMCHIP11, 0xC));
+        CHECK_FALSE(processor->getPtrToROM()->writeToPort(ROMCHIP12, 0xD));
+        CHECK_FALSE(processor->getPtrToROM()->writeToPort(ROMCHIP13, 0xE));
+        CHECK_FALSE(processor->getPtrToROM()->writeToPort(ROMCHIP14, 0xF));
+        CHECK_FALSE(processor->getPtrToROM()->writeToPort(ROMCHIP15, 0xF));
+
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP0) == 0x0);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP1) == 0x2);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP2) == 0x3);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP3) == 0x4);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP4) == 0x5);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP5) == 0x6);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP6) == 0x7);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP7) == 0x8);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP8) == 0x9);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP9) == 0xA);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP10) == 0xB);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP11) == 0xC);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP12) == 0x0);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP13) == 0x0);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP14) == 0x0);
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP15) == 0x0);
+    }
+}
+
+TEST_CASE("UnitTest_4002") {
+    
 }
 #endif
