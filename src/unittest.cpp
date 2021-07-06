@@ -3663,6 +3663,72 @@ TEST_CASE("UnitTest_4001") {
 }
 
 TEST_CASE("UnitTest_4002") {
-    
+    SECTION("CONSTRUCTOR") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 4; j++) {
+                for (int k = 0; k < 4; k++) {
+                    for (int l = 0; l < 16; l++) {
+                        CHECK(processor->getPtrToRAM()->readRAMNibble((ERAMBank) i, (ERAMChip) j, (ERAMRegister) k, l) == 0x0);
+                    }
+                    for (int l = 0; l < 4; l++) {
+                        CHECK(processor->getPtrToRAM()->readStatusNibble((ERAMBank) i, (ERAMChip) j, (ERAMRegister) k, l) == 0x0);
+                    }
+                }
+                CHECK(processor->getPtrToRAM()->readFromPortBuffer((ERAMBank) i, (ERAMChip) j) == 0x0);
+            }
+        }
+    }
+    SECTION("reset") {
+
+    }
+    SECTION("isRAMAdr/isStatusAdrAccessable") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 4; j++) {
+                CHECK(processor->getPtrToRAM()->isRAMAdrAccessable((ERAMBank) i, (ERAMChip) j));
+                CHECK(processor->getPtrToRAM()->isStatusAdrAccessable((ERAMBank) i, (ERAMChip) j));
+            }
+        }
+
+        processor = { get4004Instance(0xFFFF, 0xAD30C261) };
+
+        int activated[] = { 0, 5, 6, 9, 14, 15, 20, 21, 24, 26, 27, 29, 31 };
+        int deactivated[] = { 1, 2, 3, 4, 7, 8, 10, 11, 12, 13, 16, 17, 18, 19, 22, 23, 25, 28, 30 };
+
+        for (int i = 0; i < (sizeof(activated) / sizeof(int)); i++) {
+            CHECK(processor->getPtrToRAM()->isRAMAdrAccessable((ERAMBank) ((activated[i] - (activated[i] % 4)) / 4), (ERAMChip) (activated[i] % 4)));
+            CHECK(processor->getPtrToRAM()->isStatusAdrAccessable((ERAMBank) ((activated[i] - (activated[i] % 4)) / 4), (ERAMChip) (activated[i] % 4)));
+        }
+        for (int i = 0; i < (sizeof(deactivated) / sizeof(int)); i++) {
+            CHECK_FALSE(processor->getPtrToRAM()->isRAMAdrAccessable((ERAMBank) ((deactivated[i] - (deactivated[i] % 4)) / 4), (ERAMChip) (deactivated[i] % 4)));
+            CHECK_FALSE(processor->getPtrToRAM()->isStatusAdrAccessable((ERAMBank) ((deactivated[i] - (deactivated[i] % 4)) / 4), (ERAMChip) (deactivated[i] % 4)));
+        }
+    }
+    SECTION("read/writeRAMNibble") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xAFFAFFFA) };
+
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK0, CHIP0, REG0, 0, 0x1));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK0, CHIP1, REG1, 1, 0x2));
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK0, CHIP2, REG2, 2, 0x3));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK1, CHIP3, REG3, 3, 0x3));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK2, CHIP0, REG0, 4, 0x4));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK3, CHIP1, REG1, 5, 0x5));
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK4, CHIP0, REG2, 6, 0x6));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK4, CHIP1, REG3, 7, 0x7));
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK4, CHIP2, REG0, 8, 0x8));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK5, CHIP1, REG1, 9, 0x9));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK6, CHIP2, REG2, 10, 0xA));
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK7, CHIP0, REG3, 11, 0xB));
+        CHECK_FALSE(processor->getPtrToRAM()->writeRAMNibble(BANK7, CHIP2, REG0, 12, 0xC));
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK7, CHIP3, REG1, 13, 0xD));
+    }
+    SECTION("read/writeStatusNibble") {
+
+    }
+    SECTION("readFromPortBuffer") {
+
+    }
 }
 #endif
