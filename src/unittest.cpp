@@ -320,6 +320,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         // JCN_10 0x03
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x03);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // CMC
         processor->nextCommand();
         CHECK(processor->getCarry());
@@ -334,12 +335,15 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         // JCN_1 0x0A
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x0A);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JCN_2 0x0D
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x0D);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JCN_4 0x10
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x10);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JCN_9 0x13
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x12);
@@ -361,6 +365,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         // JCN_7 0x1C
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1C);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
 
         CHECK(processor->getTicks() == 23);
 
@@ -399,10 +404,12 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         // JCN_4 0xFE
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0xFE);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JCN_4 0x02
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x1);
         CHECK(processor->getPC().banked.address == 0x02);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // FIM_0 0x02
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R1_R0) == 0x02);
@@ -666,28 +673,36 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         // JIN_0
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x13);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         CHECK(processor->getCarry());
         // JIN_2
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x15);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_4
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x17);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_6
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x19);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_8
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1B);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_10
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1D);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_12
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1F);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JIN_14
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x21);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
 
         CHECK(processor->getTicks() == 25);
 
@@ -736,6 +751,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x1);
         CHECK(processor->getPC().banked.address == 0x02);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
 
         CHECK(processor->getTicks() == 5);
     }
@@ -817,67 +833,83 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x1);
         CHECK(processor->getPC().banked.address == 0x28);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         CHECK(processor->getCarry());
         // JUN_2 0x3A
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x2);
         CHECK(processor->getPC().banked.address == 0x3A);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_3 0x10
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x3);
         CHECK(processor->getPC().banked.address == 0x10);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_4 0x83
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x4);
         CHECK(processor->getPC().banked.address == 0x83);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_5 0x00
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x5);
         CHECK(processor->getPC().banked.address == 0x00);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_6 0xCE
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x6);
         CHECK(processor->getPC().banked.address == 0xCE);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_7 0x51
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x7);
         CHECK(processor->getPC().banked.address == 0x51);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_8 0x39
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x8);
         CHECK(processor->getPC().banked.address == 0x39);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_9 0x11
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x9);
         CHECK(processor->getPC().banked.address == 0x11);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_10 0x12
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xA);
         CHECK(processor->getPC().banked.address == 0x12);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_11 0x87
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xB);
         CHECK(processor->getPC().banked.address == 0x87);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_12 0x24
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xC);
         CHECK(processor->getPC().banked.address == 0x24);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_13 0x11
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xD);
         CHECK(processor->getPC().banked.address == 0x11);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_14 0x87
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xE);
         CHECK(processor->getPC().banked.address == 0x87);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_15 0x12
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0xF);
         CHECK(processor->getPC().banked.address == 0x12);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         // JUN_0 0x03
         processor->nextCommand();
         CHECK(processor->getPC().banked.bank == 0x0);
         CHECK(processor->getPC().banked.address == 0x03);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
 
         CHECK(processor->getTicks() == 33);
     }
@@ -1094,6 +1126,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
             processor->nextCommand();
             CHECK(processor->getRegister(R0) == i);
             CHECK(processor->getPC().banked.address == 0x03);
+            CHECK(processor->getPtrToStack()->getCount() == 0x0);
             CHECK(processor->getCarry());
         }
         // INC_1
@@ -1104,6 +1137,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getRegister(R0) == 0x0);
         CHECK(processor->getPC().banked.bank == 0x0);
         CHECK(processor->getPC().banked.address == 0x06);
+        CHECK(processor->getPtrToStack()->getCount() == 0x0);
         CHECK(processor->getCarry());
         // JUN_0 0xFE
         processor->nextCommand();

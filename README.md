@@ -1,4 +1,5 @@
 # UnitTests for C-Abschluss-Intel4004Emulator
+Version 1.0.1
 
 ## Folder structure
 Folder | Usage
@@ -56,7 +57,6 @@ Option | Effect
 > Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). Bsp: NOP, JCN, FIM, ...
 
 ## ToDo
-* CHECK stack assertion for jump commands (some push, some don't!!!)
 
 ## Authors
 * Henry Schuler / [github](https://github.com/schuler-henry)
