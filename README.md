@@ -10,7 +10,7 @@ Folder | Usage
 [inc](inc) | source files for Intel400x
 [src](src) | contains [unittest.cpp](src/unittest.cpp)
 
-> Note: The 400x files are only for test and error indication purposes and are property of group [Felder, Herkommer, Schuler, Silberzahn](https://github.com/DHBW-FN-TIT20/C-Abschluss-Intel4004Emulator/tree/David-Flo-Branch)
+> Note: The 400x files are only for test and error indication purposes and are property of group [Felder, Herkommer, Schuler, Silberzahn](https://github.com/DHBW-FN-TIT20/C-Abschluss-Intel4004Emulator)
 
 ## How to use
 * Copy the file [unittest.cpp](src/unittest.cpp) from the [src](src) folder to your project
@@ -54,6 +54,9 @@ Option | Effect
 -c \<section name\> | specify section to run
 
 > Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). Bsp: NOP, JCN, FIM, ...
+
+## ToDo
+* reset in 4002 -> data ram bank 0 selection!!!!
 
 ## Authors
 * Henry Schuler / [github](https://github.com/schuler-henry)
