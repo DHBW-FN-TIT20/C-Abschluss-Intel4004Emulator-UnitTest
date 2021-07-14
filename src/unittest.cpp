@@ -3986,5 +3986,31 @@ TEST_CASE("UnitTest_Test_Programs") {
         // before LOOP (FIM) + LOOP (FIN = 2 ticks) + after LOOP (JUN)
         CHECK(processor->getTicks() == 2 + 11 * 10 + 2);
     }
+    SECTION("TestPinLoop") {
+        /**
+         * FIM_2 0x05   1
+         * FIM_0 0x20   1
+         * LD_1         1
+         * ADD_2        1
+         * XCH_1        1
+         * FIN_0        1
+         * INC_2        1
+         * ISZ_3 0x02   1
+         * JUN_0 0x0B   1
+         * NOP          1
+         * 20 00 50 10 14 02 60 D1 B1 40 02 00 00 00 00 00 11 16 D0 B1 C0 00 A1 14 1B C0 00 C1 00
+         */
+
+        uint8_t source[] = { FIM_0, 0x00, JMS_0, 0x10, JCN_4, 0x02, INC_0, LDM_1, XCH_1, JUN_0, 0x02, NOP, NOP, NOP, NOP, NOP, JCN_1, 0x16, LDM_0, XCH_1, BBL_0, NOP, LD_1, JCN_4 , 0x1B, BBL_1, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 28);
+
+        REQUIRE(processor->getPC().banked.address == 0x00);
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getAccumulator());
+        CHECK_FALSE(processor->getTestPin());
+    }
 }
 #endif
