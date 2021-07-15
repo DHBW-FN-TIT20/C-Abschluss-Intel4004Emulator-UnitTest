@@ -20,6 +20,8 @@
 
 #include <cstdint>
 
+int TICKS_PER_CYCLE = 8;
+
 typedef enum : uint8_t {
     NOP,
     JCN_0 = 0x10,
@@ -283,13 +285,13 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
 
         CHECK_FALSE(processor->getCarry());
         CHECK_FALSE(processor->getAccumulator());
-        CHECK(processor->getTicks() == 0);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 0);
         // NOP
         processor->nextCommand();
         CHECK_FALSE(processor->getCarry());
         CHECK_FALSE(processor->getAccumulator());
 
-        CHECK(processor->getTicks() == 1);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 1);
     }
     SECTION("JCN") {
         /**
@@ -370,7 +372,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x1C);
 
-        CHECK(processor->getTicks() == 23);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 23);
 
         // RESET Processor to test jump at ROM-END
         processor->reset();
@@ -415,7 +417,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R1_R0) == 0x02);
 
-        CHECK(processor->getTicks() == 6);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 6);
     }
     SECTION("FIM") {
         /**
@@ -479,7 +481,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R15_R14) == 0x0E);
 
-        CHECK(processor->getTicks() == 17);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 17);
     }
     SECTION("FIN") {
         /**
@@ -547,7 +549,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getCarry());
         CHECK_FALSE(processor->getAccumulator());
 
-        CHECK(processor->getTicks() == 19);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 19);
 
         // RESET Processor to test jump at ROM-END
         processor->reset();
@@ -594,7 +596,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getRegisterPair(Pair_R3_R2) == 0x3A);
 
-        CHECK(processor->getTicks() == 6);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 6);
     }
     SECTION("JIN") {
         /**
@@ -697,7 +699,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x21);
 
-        CHECK(processor->getTicks() == 25);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 25);
 
         // RESET Processor to test jump at ROM-END
         processor->reset();
@@ -745,7 +747,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getPC().banked.bank == 0x1);
         CHECK(processor->getPC().banked.address == 0x02);
 
-        CHECK(processor->getTicks() == 5);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 5);
     }
     SECTION("JUN") {
         /**
@@ -887,7 +889,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getPC().banked.bank == 0x0);
         CHECK(processor->getPC().banked.address == 0x03);
 
-        CHECK(processor->getTicks() == 33);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 33);
     }
     SECTION("JMS") {
         /**
@@ -932,7 +934,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
 
         delete[] stackCopy;
 
-        CHECK(processor->getTicks() == 5);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 5);
     }
     SECTION("INC") {
         /**
@@ -1051,7 +1053,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getRegister(R15) == 0x0);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 33);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 33);
     }
     SECTION("ISZ") {
         /**
@@ -1124,7 +1126,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getRegister(R1) == 0x1);
         CHECK(processor->getCarry());
         
-        CHECK(processor->getTicks() == 55);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 55);
 
     }
     SECTION("ADD") {
@@ -1179,7 +1181,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK_FALSE(processor->getCarry());
         CHECK(processor->getRegister(R0) == 0x2);
 
-        CHECK(processor->getTicks() == 0x8);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 0x8);
     }
     SECTION("SUB") {
         /**
@@ -1237,7 +1239,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK_FALSE(processor->getCarry());
         CHECK(processor->getRegister(R14) == 0x9);
 
-        CHECK(processor->getTicks() == 9);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 9);
     }
     SECTION("LD") {
         /**
@@ -1289,7 +1291,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getRegister(R14) == 0x9);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 8);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 8);
     }
     SECTION("XCH") {
         /**
@@ -1347,7 +1349,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getRegister(R14) == 0x2);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 8);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 8);
     }
     SECTION("BBL") {
         /**
@@ -1548,7 +1550,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
 
         delete[] stackCopy;
 
-        CHECK(processor->getTicks() == 19);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 19);
     }
     SECTION("LDM") {
         /**
@@ -1585,7 +1587,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x0);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 4);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 4);
     }
     SECTION("CLB") {
         /**
@@ -1636,7 +1638,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x0);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 7);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 7);
     }
     SECTION("CLC") {
         /**
@@ -1673,7 +1675,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x2);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 4);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 4);
     }
     SECTION("IAC") {
         /**
@@ -1720,7 +1722,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x1);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 6);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 6);
     }
     SECTION("CMC") {
         /**
@@ -1750,7 +1752,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         processor->nextCommand();
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 3);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 3);
     }
     SECTION("RAL") {
         /**
@@ -1783,7 +1785,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xD);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 3);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 3);
     }
     SECTION("RAR") {
         /**
@@ -1816,7 +1818,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xA);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 3);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 3);
     }
     SECTION("TCC") {
         /**
@@ -1863,7 +1865,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x0);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 6);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 6);
     }
     SECTION("DAC") {
         /**
@@ -1906,7 +1908,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xD);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 5);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 5);
     }
     SECTION("TCS") {
         /**
@@ -1943,7 +1945,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x9);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 4);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 4);
     }
     SECTION("STC") {
         /**
@@ -1985,7 +1987,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x5);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 5);        
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 5);        
     }
     SECTION("DAA") {
         /**
@@ -2042,7 +2044,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x0);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 8);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 8);
     }
     SECTION("KBP") {
         /**
@@ -2155,7 +2157,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
             CHECK(processor->getCarry());
         }
 
-        CHECK(processor->getTicks() == 32);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 32);
     }
     SECTION("DCL") {
         /**
@@ -2219,7 +2221,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
             CHECK(processor->getPtrToRAM()->readRAMNibble((ERAMBank) i, CHIP0, REG0, 0x0) == i);
         }
 
-        CHECK(processor->getTicks() == 26);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 26);
     }
     SECTION("SRC") {
         /**
@@ -2288,7 +2290,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
             }
         }
 
-        CHECK(processor->getTicks() == 57);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 57);
     }
     SECTION("WRM") {
         /**
@@ -2350,7 +2352,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x6);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WMP") {
         /**
@@ -2412,7 +2414,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x6);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WRR") {
         /**
@@ -2474,7 +2476,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x6);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WPM") {
         /**
@@ -2513,7 +2515,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x5);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 4);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 4);
     }
     SECTION("WR0") {
         /**
@@ -2573,7 +2575,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x2);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WR1") {
         /**
@@ -2633,7 +2635,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x2);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WR2") {
         /**
@@ -2693,7 +2695,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x2);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("WR3") {
         /**
@@ -2753,7 +2755,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x2);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 12);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 12);
     }
     SECTION("SBM") {
         /**
@@ -2829,7 +2831,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x0);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 15);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 15);
     }
     SECTION("RDM") {
         /**
@@ -2918,7 +2920,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x6);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 18);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 18);
     }
     SECTION("RDR") {
         /**
@@ -3011,7 +3013,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0x8);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 19);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 19);
     }
     SECTION("ADM") {
         /**
@@ -3079,7 +3081,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xE);
         CHECK_FALSE(processor->getCarry());
 
-        CHECK(processor->getTicks() == 13);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 13);
     }
     SECTION("RD0") {
         /**
@@ -3160,7 +3162,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 16);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 16);
     }
     SECTION("RD1") {
         /**
@@ -3241,7 +3243,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 16);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 16);
     }
     SECTION("RD2") {
         /**
@@ -3322,7 +3324,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 16);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 16);
     }
     SECTION("RD3") {
         /**
@@ -3403,7 +3405,7 @@ TEST_CASE("UnitTest_Intel4004_Mnemonics") {
         CHECK(processor->getAccumulator() == 0xF);
         CHECK(processor->getCarry());
 
-        CHECK(processor->getTicks() == 16);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 16);
     }
 }
 
@@ -3872,7 +3874,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         }
         CHECK(processor->getRegisterPair(Pair_R5_R4) == 0x74);
 
-        CHECK(processor->getTicks() == 13);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 13);
     }
     SECTION("bcd_add") {
         /**
@@ -3907,7 +3909,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         }
         CHECK(processor->getRegisterPair(Pair_R5_R4) == 0x90);
 
-        CHECK(processor->getTicks() == 15);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 15);
     }
     SECTION("loop") {
         /**
@@ -3947,7 +3949,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         CHECK(processor->getRegisterPair(Pair_R3_R2) == 0x38);
 
         // before LOOP (FIM) + LOOP (without second ISZ) + second ISZ + JUN_0
-        CHECK(processor->getTicks() == (4 + 0x38 * 9 + 4 * 2 + 2));
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * (4 + 0x38 * 9 + 4 * 2 + 2));
     }
     SECTION("LoopText") {
         /**
@@ -3984,7 +3986,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         CHECK((int) processor->getRegisterPair(Pair_R3_R2) == 0xB0);
 
         // before LOOP (FIM) + LOOP (FIN = 2 ticks) + after LOOP (JUN)
-        CHECK(processor->getTicks() == 2 + 11 * 10 + 2);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * (2 + 11 * 10 + 2));
     }
     SECTION("TestPinLoop") {
         /**
@@ -4075,7 +4077,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         processor->nextCommand();
         CHECK(processor->getPC().banked.address == 0x02);
 
-        CHECK(processor->getTicks() == 60);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 60);
     }
     SECTION("add_using_RAM") {
         /**
@@ -4099,7 +4101,7 @@ TEST_CASE("UnitTest_Test_Programs") {
 
         Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
 
-        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 28);
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 89);
 
         REQUIRE(processor->getPC().banked.address == 0x00);
         CHECK_FALSE(processor->getCarry());
@@ -4130,7 +4132,7 @@ TEST_CASE("UnitTest_Test_Programs") {
         CHECK(processor->getPtrToRAM()->readRAMNibble(BANK0, CHIP0, REG2, 4) == 0);
 
 
-        CHECK(processor->getTicks() == 143);
+        CHECK(processor->getTicks() == TICKS_PER_CYCLE * 143);
     }
 }
 #endif

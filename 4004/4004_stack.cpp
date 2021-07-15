@@ -102,7 +102,7 @@ void Intel4004Stack::WarningCondition(const EDirection) { /* Wird bei Unter/Übe
 }
 
 /***************** Sektion UNITTEST ************************************************************************/
-#define _UNITTEST_
+//#define _UNITTEST_
 #ifdef _UNITTEST_
 
 #define CATCH_CONFIG_FAST_COMPILE
