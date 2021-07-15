@@ -11,10 +11,11 @@ Folder | Usage
 [inc](inc) | source files for Intel400x
 [src](src) | contains [unittest.cpp](src/unittest.cpp)
 
-> Note: The 400x files are only for test and error indication purposes and are property of group [Felder, Herkommer, Schuler, Silberzahn](https://github.com/DHBW-FN-TIT20/C-Abschluss-Intel4004Emulator/tree/David-Flo-Branch)
+> Note: The 400x files are only for test and error indication purposes and are property of group [Felder, Herkommer, Schuler, Silberzahn](https://github.com/DHBW-FN-TIT20/C-Abschluss-Intel4004Emulator)
 
 ## How to use
 * Copy the file [unittest.cpp](src/unittest.cpp) from the [src](src) folder to your project
+* Copy the file [BinaryFile.bin](inc/BinaryFile.bin) and [IntelHexFile.hex](inc/IntelHexFile.hex) from the [inc](inc) folder to your project
 * Replace the following include paths with your corresponding paths *(Make sure to use \\ for windows and / for unix!)*
 ```C++
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
@@ -23,6 +24,16 @@ Folder | Usage
 #elif __unix__
     #include "../inc/catch.hpp"
     #include "../4004/4004.h"
+#endif
+```
+* Replace the following define paths with your corresponding paths *(Make sure to use \\\\ for windows and / for unix!)*
+```C++
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    #define INTEL_HEX_FILE_PATH "..\\inc\\IntelHexFile.hex"
+    #define BINARY_FILE_PATH "..\\inc\\BinaryFile.bin"
+#elif __unix__
+    #define INTEL_HEX_FILE_PATH "../inc/IntelHexFile.hex"
+    #define BINARY_FILE_PATH "../inc/BinaryFile.bin"
 #endif
 ```
 * Compile unittest.cpp according to the [Compile](#Compile) section
@@ -43,7 +54,7 @@ Folder | Usage
 
 ### Linux:
 * `./unittest.out <test name>`
-> Note: \<test name\> can be ignored for now because there is only one test case (UnitTest_Intel4004_Mnemonics)
+> Note: With \<test name\> you can specify the TestCase that should be executed i.e.: `UnitTest_Intel4004_Mnemonics` or `UnitTest_4001`
 
 ### Commandline options:
 Option | Effect
@@ -54,9 +65,13 @@ Option | Effect
 -d \<yes\|no\> | show test durations
 -c \<section name\> | specify section to run
 
-> Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). Bsp: NOP, JCN, FIM, ...
+> Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). i.e.: `NOP`, `JCN`, `FIM`, ...
+
+## ToDo
+* Reset in 4002 -> data ram bank 0 selection
+* UnitTest for 4004 and 4004_stack
 
 ## ToDo
 
 ## Authors
-* Henry Schuler / [github](https://github.com/schuler-henry)
+* Henry Schuler / [github](https://github.com/schuler-henry) / [E-Mail](mailto:schuler.henry-it20@it.dhbw-ravensburg.de?subject=[GitHub]%20C%20Intel4004%20Emulator%20UnitTest)
