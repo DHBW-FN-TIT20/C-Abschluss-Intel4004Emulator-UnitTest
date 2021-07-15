@@ -102,9 +102,11 @@ void Intel4004Stack::WarningCondition(const EDirection) { /* Wird bei Unter/Übe
 }
 
 /***************** Sektion UNITTEST ************************************************************************/
+#define _UNITTEST_
 #ifdef _UNITTEST_
 
 #define CATCH_CONFIG_FAST_COMPILE
+#define CATCH_CONFIG_MAIN
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 	#include "..\inc\catch.hpp"
@@ -212,8 +214,8 @@ TEST_CASE("Stack") {
 
 		//Ein Wert wieder reinschreiben
 		stack.push(1);
-		CHECK(stack.getCount() == 1);
-		CHECK(stack.getCurrentStackPosition() == 1);
+		CHECK(stack.getCount() == 0);
+		CHECK(stack.getCurrentStackPosition() == 0);
 	}
 
 	SECTION("EnterValuesToStackMishMashNoOverflow") {
@@ -301,10 +303,10 @@ TEST_CASE("Stack") {
 		CHECK(stack.pop().raw == 1);
 		CHECK_FALSE(stack.getReportedOverflow());
 		CHECK_FALSE(stack.getReportedUnderflow());
-		CHECK(stack.pop().raw == 0);
+		CHECK(stack.pop().raw == 3);
 		CHECK_FALSE(stack.getReportedOverflow());
 		CHECK(stack.getReportedUnderflow());
-		CHECK(stack.pop().raw == 0);
+		CHECK(stack.pop().raw == 2);
 		CHECK_FALSE(stack.getReportedOverflow());
 		CHECK(stack.getReportedUnderflow());
 	}
