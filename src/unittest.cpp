@@ -3876,6 +3876,414 @@ TEST_CASE("UnitTest_4002") {
     }
 }
 
+TEST_CASE("UnitTest_4004") {
+    SECTION("CONSTRUCTOR") {
+        /** 
+         * In this partiular case, the Intel4004 constructor is not tested/used directly, but with the given function "get4004Instance()". 
+         * That is because this is the requested way to instantiate an Intel4004 object.
+         * Using this helper method, it is possible to instantiate an Intel4004 with different amounts of Intel4001 (ROM) and Intel4002 (RAM) chips.
+         */
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        for (int i = 0; i < 16; i++) {
+            CHECK_FALSE(processor->getRegister((ERegister) i));
+        }
+
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getTestPin());
+        CHECK_FALSE(processor->getAccumulator());
+        CHECK_FALSE(processor->getTicks());
+        CHECK_FALSE(processor->getPC());
+        CHECK_FALSE(processor->getPtrToROM() == nullptr);
+        CHECK_FALSE(processor->getPtrToRAM() == nullptr);
+        CHECK_FALSE(processor->getPtrToStack() == nullptr);
+    }
+    SECTION("reset") {
+        /**
+         * Due to the fact, that Intel4004Base does not name any setter functions, the only way to test this functions is through Mnemonics.
+         */
+        /**
+         * STC          1
+         * LDM_15       1
+         * WRM          1
+         * FIM_0 0x23   1
+         * FIM_14 0x12  1
+         * JMS_0 0x09   1
+         * NOP          1
+         */
+
+        uint8_t source[] = { STC, LDM_15, WRM, FIM_0, 0x23, FIM_14, 0x12, JMS_0, 0x09, NOP };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 10);
+
+        processor->setTestPin();
+        
+        // Check whether all positions are set
+        CHECK(processor->getRegisterPair(Pair_R1_R0));
+        CHECK(processor->getRegisterPair(Pair_R15_R14));
+        CHECK(processor->getCarry());
+        CHECK(processor->getTestPin());
+        CHECK(processor->getAccumulator());
+        CHECK(processor->getTicks());
+        CHECK(processor->getPC());
+        CHECK(processor->getPtrToROM()->readFromPort(ROMCHIP0));
+        CHECK(processor->getPtrToRAM()->readRAMNibble(BANK0, CHIP0, REG0, 0x00));
+        CHECK(processor->getPtrToStack()->getCurrentStackPosition());
+        
+        
+        processor->reset();
+
+        // Check whether all positions are reset
+        for (int i = 0; i < 16; i++) {
+            CHECK_FALSE(processor->getRegister((ERegister) i));
+        }
+
+        CHECK_FALSE(processor->getCarry());
+        CHECK_FALSE(processor->getTestPin());
+        CHECK_FALSE(processor->getAccumulator());
+        CHECK_FALSE(processor->getTicks());
+        CHECK_FALSE(processor->getPC());
+        CHECK_FALSE(processor->getPtrToROM()->readFromPort(ROMCHIP0));
+        CHECK_FALSE(processor->getPtrToRAM()->readRAMNibble(BANK0, CHIP0, REG0, 0x00));
+        CHECK_FALSE(processor->getPtrToStack()->getCurrentStackPosition());
+    }
+    SECTION("getCarry") {
+        /**
+         * STC          1
+         */
+
+        uint8_t source[] = { STC };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 1);
+
+        CHECK_FALSE(processor->getCarry());
+
+        processor->nextCommand();
+
+        CHECK(processor->getCarry());
+    }
+    SECTION("getAccumulator") {
+        /**
+         * LDM_10       1
+         */
+
+        uint8_t source[] = { LDM_10 };
+
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 1);
+
+        CHECK_FALSE(processor->getAccumulator());
+        
+        processor->nextCommand();
+
+        CHECK(processor->getAccumulator() == 0xA);
+    }
+    SECTION("getPC") {
+        /**
+         * JUN_15 0x23  1
+         */
+
+        uint8_t source[] = { JUN_15, 0x23 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+        
+        CHECK_FALSE(processor->getPC());
+
+        processor->nextCommand();
+
+        CHECK(processor->getPC() == 0xF23);
+    }
+    SECTION("getRegister") {
+        /**
+         * FIM_14 0x24  1
+         */
+
+        uint8_t source[] = { FIM_14, 0x24 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+
+        processor->nextCommand();
+
+        CHECK_FALSE(processor->getRegister(R0));
+        CHECK(processor->getRegister(R14) == 0x2);
+        CHECK(processor->getRegister(R15) == 0x4);
+    }
+    SECTION("getRegisterPair") {
+        /**
+         * FIM_14 0x24  1
+         */
+
+        uint8_t source[] = { FIM_14, 0x24 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+
+        processor->nextCommand();
+
+        CHECK_FALSE(processor->getRegisterPair(Pair_R1_R0));
+        CHECK(processor->getRegisterPair(Pair_R15_R14) == 0x24);
+    }
+    SECTION("getPtrToROM") {
+        /**
+         * FIM_14 0x24  1
+         */
+
+        uint8_t source[] = { FIM_14, 0x24 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        // Check whether ROM can be accessed
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+    }
+    SECTION("getPtrToRAM") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        // Check whether RAM can be accessed
+        CHECK(processor->getPtrToRAM()->writeRAMNibble(BANK0, CHIP0, REG0, 0x0, 5));
+    }
+    SECTION("getPtrToStack") {
+        /**
+         * JMS_0 0x00   1
+         */
+
+        uint8_t source[] = { JMS_0, 0x00 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+        
+        processor->nextCommand();
+
+        CHECK(processor->getPtrToStack()->getCount() == 1);
+    }
+    SECTION("getTicks") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK_FALSE(processor->getTicks());
+
+        processor->nextCommand();
+
+        CHECK(processor->getTicks() == 8);
+    }
+    SECTION("resetTicks") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK_FALSE(processor->getTicks());
+
+        processor->nextCommand();
+
+        CHECK(processor->getTicks() == 8);
+
+        processor->resetTicks();
+
+        CHECK_FALSE(processor->getTicks());
+    }
+    SECTION("getTestPin/setTestPin") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK_FALSE(processor->getTestPin());
+
+        processor->setTestPin(true);
+
+        CHECK(processor->getTestPin());
+
+        processor->setTestPin(false);
+
+        CHECK_FALSE(processor->getTestPin());
+    }
+    SECTION("nextCommand") {
+        /** 
+         * This command is being used in almost every TEST_CASE and SECTION.
+         * Therefore I will not test it here again, if the other SECTIONS work, it is almost impossible to have an error in nextCommand!
+         */
+    }
+}
+
+TEST_CASE("UnitTest_4004Stack") {
+    SECTION("CONSTRUCTOR") {
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+
+        CHECK_FALSE(processor->getPtrToStack()->getCount());
+        CHECK_FALSE(processor->getPtrToStack()->getCurrentStackPosition());
+        CHECK_FALSE(processor->getPtrToStack()->isOverflow());
+        CHECK_FALSE(processor->getPtrToStack()->isUnderflow());
+        UBankedAddress copyStack[3];
+        processor->getPtrToStack()->getCopyOfStack(copyStack);
+        for (int i = 0; i < 3; i++) {
+            CHECK_FALSE(copyStack[i]);
+        }
+    }
+    SECTION("reset") {
+        /**
+         * JMS_0 0x02   1
+         * JMS_0 0x04   1
+         */
+
+        uint8_t source[] = { JMS_0, 0x02, JMS_0, 0x04 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 4);
+
+        for (int i = 0; i < 2; i++) {
+            processor->nextCommand();
+        }
+
+        UBankedAddress copyStack[3];
+
+        processor->getPtrToStack()->getCopyOfStack(copyStack);
+
+        // Check whether all positions are set
+        CHECK(processor->getPtrToStack()->getCount());
+        CHECK(processor->getPtrToStack()->getCurrentStackPosition());
+        CHECK(copyStack[0]);
+
+        processor->getPtrToStack()->reset();
+
+        // Check whether all positions are reset
+        CHECK_FALSE(processor->getPtrToStack()->getCount());
+        CHECK_FALSE(processor->getPtrToStack()->getCurrentStackPosition());
+        processor->getPtrToStack()->getCopyOfStack(copyStack);
+        for (int i = 0; i < 3; i++) {
+            CHECK_FALSE(copyStack[i]);
+        }
+    }
+    SECTION("getCurrentStackPosition") {
+        /**
+         * JMS_0 0x00   1
+         */
+
+        uint8_t source[] = { JMS_0, 0x00 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+        
+        for (int i = 0; i < 3; i++) {
+            CHECK(processor->getPtrToStack()->getCurrentStackPosition() == i);
+            processor->nextCommand();
+        }
+            CHECK(processor->getPtrToStack()->getCurrentStackPosition() == 0);
+    }
+    SECTION("getCount") {
+        /**
+         * This section could raise some errors, you have to decide yourself whether these errors are ok or not.
+         * In this case, these tests are implemented to check the behaviour of Intel4004Stack the way I thought was right/ok.
+         */
+        /**
+         * JMS_0 0x00   1
+         */
+
+        uint8_t source[] = { JMS_0, 0x00 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+        
+        for (int i = 0; i < 6; i++) {
+            CHECK(processor->getPtrToStack()->getCount() == i);
+            processor->nextCommand();
+        }
+    }
+    SECTION("isOverflow") {
+        /**
+         * JMS_0 0x00   1
+         */
+
+        uint8_t source[] = { JMS_0, 0x00 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 2);
+
+        for (int i = 0; i < 3; i++) {
+            processor->nextCommand();
+        }
+
+        CHECK_FALSE(processor->getPtrToStack()->isOverflow());
+
+        for (int i = 0; i < 2; i++) {
+            processor->nextCommand();
+            CHECK(processor->getPtrToStack()->isOverflow());
+        }
+    }
+    SECTION("isUnderflow") {
+        /**
+         * BBL_0        1
+         */
+
+        uint8_t source[] = { BBL_0 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 1);
+
+        CHECK_FALSE(processor->getPtrToStack()->isUnderflow());
+
+        for (int i = 0; i < 3; i++) {
+            processor->nextCommand();
+            CHECK(processor->getPtrToStack()->isUnderflow());
+        }
+    }
+    SECTION("getCopyOfStack") {
+        /**
+         * JMS_0 0x02   1
+         * JMS_0 0x04   1
+         * JMS_0 0x06   1
+         * JMS_0 0x08   1
+         * JMS_0 0x0A   1
+         * BBL_0
+         */
+
+        uint8_t source[] = { JMS_0, 0x02, JMS_0, 0x04, JMS_0, 0x06, JMS_0, 0x08, JMS_0, 0x0A, BBL_0 };
+        
+        Intel4004Base *processor = { get4004Instance(0xFFFF, 0xFFFFFFFF) };
+        
+        CHECK(processor->getPtrToROM()->writeFrom(source, sizeof(source)) == 11);
+    
+        for (int i = 0, i < 3; i++) {
+            processor->nextCommand();
+        }
+
+        UBankedAddress copyStack[3];
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+
+        CHECK(copyStack[0] == 0x04);
+        CHECK(copyStack[1] == 0x02);
+        CHECK(copyStack[2] == 0x00);
+
+        for (int i = 0; i < 2; i++) {
+            processor->nextCommand();
+        }
+
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+
+        CHECK(copyStack[0] == 0x08);
+        CHECK(copyStack[1] == 0x06);
+        CHECK(copyStack[2] == 0x04);
+
+        processor->nextCommand();
+
+        processor->getPtrToStack()->getCopyOfStack(stackCopy);
+
+        CHECK(copyStack[0] == 0x06);
+        CHECK(copyStack[1] == 0x04);
+        // If the following CHECK fails, you do not have a correct ring-stack. (Take a look at MCS-4_Assembly_Language_Programming_Manual_Dec73.pdf p.2-8)
+        CHECK(copyStack[2] == 0x08);
+    }
+}
+
 TEST_CASE("UnitTest_Test_Programs") {
     SECTION("add") {
         /**
@@ -4115,6 +4523,9 @@ TEST_CASE("UnitTest_Test_Programs") {
     }
     SECTION("add_using_RAM") {
         /**
+         * Program described in studienarbeit-4004.pdf p.32
+         * 
+         * Hex code for online tool: (Note: Do only copy the hex values, do not copy headlines and "*".)
          * INIT 34
          * 20 00 22 10 24 20 D1 21 E0 61 D2 21 E0 61 D3 21 E0 E4 D1 23 E0 63 D1 23 E0 63 D7 23 E0 63 D4 23 E0 E4
          * 
