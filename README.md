@@ -37,7 +37,8 @@ Folder | Usage
 #endif
 ```
 * Compile unittest.cpp according to the [Compile](#Compile) section
-* Run the compiled file, for help, take a look at the [How to run?](#How-to-run?) section
+* Run the compiled file, for help, take a look at the [How to run](#How-to-run) section
+* For help during execution, take a look at the [Bug fixing](#Bug-fixing) section
 
 ## Compile
 ### Windows:
@@ -48,7 +49,7 @@ Folder | Usage
 
 > Note: Your relative paths to the needed c/cpp files might be different if you are not using this project's structure or file naming
 
-## How to run?
+## How to run
 ### Windows:
 * `unittest.exe <test name>`
 
@@ -67,11 +68,15 @@ Option | Effect
 
 > Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). i.e.: `NOP`, `JCN`, `FIM`, ...
 
-## ToDo
-* Reset in 4002 -> data ram bank 0 selection
-* UnitTest for 4004 and 4004_stack
+## Bug fixing
+* If the unit test stops execution printing only `Filters:` there was an error!
+    * Make sure to differentiate when deleting variables that where created with the `new` statement
+        - [ ] Objects / everyting except arrays: `delete <var>`
+        - [ ] Arrays: `delete[] <var>`
+    * Check whether you are writing to memory you do not own (i.e. if your array is too small)
 
 ## ToDo
+* Reset in 4002 -> data ram bank 0 selection
 
 ## Authors
 * Henry Schuler / [github](https://github.com/schuler-henry) / [E-Mail](mailto:schuler.henry-it20@it.dhbw-ravensburg.de?subject=[GitHub]%20C%20Intel4004%20Emulator%20UnitTest)
