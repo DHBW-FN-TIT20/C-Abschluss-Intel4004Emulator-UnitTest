@@ -1,5 +1,5 @@
 # UnitTests for C-Abschluss-Intel4004Emulator
-Version 1.0.1
+Version 1.1.1
 
 ## Folder structure
 Folder | Usage
@@ -39,6 +39,7 @@ Folder | Usage
 * Compile unittest.cpp according to the [Compile](#Compile) section
 * Run the compiled file, for help, take a look at the [How to run](#How-to-run) section
 * For help during execution, take a look at the [Bug fixing](#Bug-fixing) section
+> Note: Due to the fact that I made some changes to the given sample solutions, some of the unit tests for Intel4001 and Intel4004Stack might fail. In that case you have to decide wheter you want to stick to the sample solution or make changes according to the unit tests.
 
 ## Compile
 ### Windows:
