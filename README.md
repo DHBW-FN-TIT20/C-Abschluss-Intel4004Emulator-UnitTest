@@ -37,20 +37,24 @@ Folder | Usage
 #endif
 ```
 * Compile unittest.cpp according to the [Compile](#Compile) section
-* Run the compiled file, for help, take a look at the [How to run](#How-to-run) section
-* For help during execution, take a look at the [Bug fixing](#Bug-fixing) section
+* Run the compiled file, for help, take a look at the [How to Run](#How-to-Run) section
+* For help during execution, take a look at the [Bug Fixing](#Bug-Fixing) section
 > Note: Due to the fact that I made some changes to the given sample solutions, some of the unit tests for Intel4001 and Intel4004Stack might fail. In that case you have to decide wheter you want to stick to the sample solution or make changes according to the unit tests.
 
 ## Compile
 ### Windows:
-* `g++ unittest.cpp ..\4001-ROM\4001.cpp ..\4002-RAM\4002.cpp ..\4004\4004.cpp ..\4004\4004_stack.cpp ..\inc\intelhex.c -o unittest.exe`
+```powershell
+g++ unittest.cpp ..\4001-ROM\4001.cpp ..\4002-RAM\4002.cpp ..\4004\4004.cpp ..\4004\4004_stack.cpp ..\inc\intelhex.c -o unittest.exe
+```
 
 ### Linux:
-* `g++ unittest.cpp ../4001-ROM/4001.cpp ../4002-RAM/4002.cpp ../4004/4004.cpp ../4004/4004_stack.cpp ../inc/intelhex.c -o unittest.out`
+```bash
+g++ unittest.cpp ../4001-ROM/4001.cpp ../4002-RAM/4002.cpp ../4004/4004.cpp ../4004/4004_stack.cpp ../inc/intelhex.c -o unittest.out
+```
 
 > Note: Your relative paths to the needed c/cpp files might be different if you are not using this project's structure or file naming
 
-## How to run
+## How to Run
 ### Windows:
 * `unittest.exe <test name>`
 
@@ -58,7 +62,7 @@ Folder | Usage
 * `./unittest.out <test name>`
 > Note: With \<test name\> you can specify the TestCase that should be executed i.e.: `UnitTest_Intel4004_Mnemonics` or `UnitTest_4001`
 
-### Commandline options:
+### Commandline Options:
 Option | Effect
 ------ | ------
 -h, -? | display usage information
@@ -69,7 +73,7 @@ Option | Effect
 
 > Note: The section names correspond with the Mnemonic names and follow the order of [4004Data.pdf](docs/4004Data.pdf). i.e.: `NOP`, `JCN`, `FIM`, ...
 
-## Bug fixing
+## Bug Fixing
 * If the unit test stops execution printing only `Filters:` there was an error!
     * Make sure to differentiate when deleting variables that where created with the `new` statement
         - [ ] Objects / everyting except arrays: `delete <var>`
@@ -81,3 +85,5 @@ Option | Effect
 
 ## Authors
 * Henry Schuler / [github](https://github.com/schuler-henry) / [E-Mail](mailto:schuler.henry-it20@it.dhbw-ravensburg.de?subject=[GitHub]%20C%20Intel4004%20Emulator%20UnitTest)
+
+Copyright 2021, Henry Schuler, All rights reserved.
